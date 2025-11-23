@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Karşılaştırma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Outfit', sans-serif; } .winner { background-color: #dcfce7; border-color: #22c55e; color: #15803d; font-weight: bold; } .loser { background-color: #fee2e2; border-color: #ef4444; opacity: 0.7; }</style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    
+<nav class="bg-white/95 backdrop-blur-md shadow-md sticky top-0 z-50 font-sans border-t-4 border-orange-500">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="w-11 h-11 bg-gradient-to-br from-orange-500 via-red-500 to-purple-600 rounded-2xl rotate-3 flex items-center justify-center text-white font-extrabold text-2xl shadow-lg group-hover:rotate-12 transition">V</div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-900 to-orange-600 leading-none">Volley<span class="text-orange-500">Markt</span></span>
+                    <span class="text-[10px] text-gray-400 tracking-[0.2em] uppercase font-bold">Türkiye</span>
+                </div>
+            </a>
+            <div class="hidden md:flex space-x-1 items-center bg-gray-100/50 p-1 rounded-full">
+                <a href="/" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Anasayfa</a>
+                <a href="/haberler/" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Haberler</a>
+                <a href="/#oyuncular" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Oyuncular</a>
+            </div>
+            <div class="flex items-center gap-3">
+                {% if user.is_authenticated %}
+                    {% if user.menajer %}<a href="/menajer-panel/" class="bg-indigo-900 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md">💼 Panel</a>
+                    {% elif user.sporcu %}<a href="/profil-duzenle/" class="bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md">✏️ Profil</a>{% endif %}
+                    <a href="/cikis/" class="text-red-500 font-bold text-sm">Çıkış</a>
+                {% else %}
+                    <a href="/giris/" class="text-indigo-900 font-bold">Giriş</a>
+                    <a href="/kayit/" class="bg-indigo-900 text-white px-5 py-2 rounded-full font-bold text-sm">Kayıt Ol</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-indigo-900 mb-2">⚔️ Karşılaştırma</h1>
+        <div class="flex justify-center items-center gap-4 mb-8"><span class="text-xl font-bold text-gray-600">{{ p1.isim }}</span><span class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">VS</span><span class="text-xl font-bold text-gray-600">{{ p2.isim }}</span></div>
+        <div class="grid grid-cols-2 gap-4 md:gap-12 max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="h-64 bg-gray-200 relative">{% if p1.profil_fotografi %}<img src="{{ p1.profil_fotografi.url }}" class="w-full h-full object-cover">{% endif %}<div class="absolute bottom-0 left-0 w-full bg-black/60 p-2 text-center text-white font-bold">{{ p1.isim }}</div></div>
+                <div class="p-4 space-y-2">
+                    <div class="flex justify-between items-center p-3 border rounded {% if analiz.boy == 1 %}winner{% elif analiz.boy == 2 %}loser{% endif %}"><span>Boy</span><span>{{ p1.boy }} cm</span></div>
+                    <div class="flex justify-between items-center p-3 border rounded {% if analiz.smac == 1 %}winner{% elif analiz.smac == 2 %}loser{% endif %}"><span>Smaç</span><span>{{ p1.smac_yuksekligi|default:"-" }}</span></div>
+                    <div class="flex justify-between items-center p-3 border rounded {% if analiz.deger == 1 %}winner{% elif analiz.deger == 2 %}loser{% endif %}"><span>Değer</span><span>€ {{ p1.piyasa_degeri|default:"-" }}</span></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="h-64 bg-gray-200 relative">{% if p2.profil_fotografi %}<img src="{{ p2.profil_fotografi.url }}" class="w-full h-full object-cover">{% endif %}<div class="absolute bottom-0 left-0 w-full bg-black/60 p-2 text-center text-white font-bold">{{ p2.isim }}</div></div>
+                <div class="p-4 space-y-2">
+                    <div class="flex justify-between items-center p-3 border rounded {% if analiz.boy == 2 %}winner{% elif analiz.boy == 1 %}loser{% endif %}"><span>Boy</span><span>{{ p2.boy }} cm</span></div>
+                    <div class="flex justify-between items-center p-3 border rounded {% if analiz.smac == 2 %}winner{% elif analiz.smac == 1 %}loser{% endif %}"><span>Smaç</span><span>{{ p2.smac_yuksekligi|default:"-" }}</span></div>
+                    <div class="flex justify-between items-center p-3 border rounded {% if analiz.deger == 2 %}winner{% elif analiz.deger == 1 %}loser{% endif %}"><span>Değer</span><span>€ {{ p2.piyasa_degeri|default:"-" }}</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+<footer class="bg-gradient-to-b from-gray-900 to-indigo-950 text-gray-300 mt-24 border-t-4 border-orange-500">
+    <div class="container mx-auto px-4 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="col-span-1 md:col-span-2">
+                <h2 class="text-3xl font-extrabold text-white mb-4">Volley<span class="text-orange-500">Markt</span></h2>
+                <p class="text-sm leading-relaxed mb-6 opacity-80">Türkiye'nin en gelişmiş voleybol veri platformu.</p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-orange-500 hover:text-white transition">𝕏</a>
+                    <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-orange-500 hover:text-white transition">📷</a>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-white font-bold text-lg mb-4 border-b-2 border-orange-500 pb-2 inline-block">Hızlı Linkler</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/" class="hover:text-orange-400 transition">→ Anasayfa</a></li>
+                    <li><a href="/haberler/" class="hover:text-orange-400 transition">→ Haber Merkezi</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-white font-bold text-lg mb-4 border-b-2 border-orange-500 pb-2 inline-block">İletişim</h3>
+                <p class="text-sm">İstanbul, Türkiye</p>
+                <p class="text-sm mt-2">info@volleymarkt.com</p>
+            </div>
+        </div>
+        <div class="border-t border-white/10 mt-12 pt-8 text-center text-xs opacity-50">&copy; 2025 VolleyMarkt. Tüm hakları saklıdır.</div>
+    </div>
+</footer>
+
+</body>
+</html>

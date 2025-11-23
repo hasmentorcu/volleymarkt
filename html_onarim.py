@@ -1,0 +1,236 @@
+import os
+
+# ==========================================
+# 1. PARÇALAR
+# ==========================================
+NAVBAR_HTML = """
+<nav class="bg-white/95 backdrop-blur-md shadow-md sticky top-0 z-50 font-sans border-t-4 border-orange-500">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="w-11 h-11 bg-gradient-to-br from-orange-500 via-red-500 to-purple-600 rounded-2xl rotate-3 flex items-center justify-center text-white font-extrabold text-2xl shadow-lg group-hover:rotate-12 transition">V</div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-900 to-orange-600 leading-none">Volley<span class="text-orange-500">Markt</span></span>
+                    <span class="text-[10px] text-gray-400 tracking-[0.2em] uppercase font-bold">Türkiye</span>
+                </div>
+            </a>
+
+            <div class="hidden md:flex space-x-1 items-center bg-gray-100/50 p-1 rounded-full">
+                <a href="/" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Anasayfa</a>
+                <a href="/haberler/" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Haberler</a>
+                <a href="/#oyuncular" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Oyuncular</a>
+            </div>
+
+            <div class="flex items-center gap-3">
+                {% if user.is_authenticated %}
+                    
+                    <a href="/bildirimler/" class="relative p-2 rounded-full bg-gray-100 hover:bg-orange-100 text-gray-600 hover:text-orange-600 transition group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:scale-110 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        {% if bildirim_sayisi > 0 %}
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full animate-pulse border-2 border-white">
+                            {{ bildirim_sayisi }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% if user.menajer %}
+                        <a href="/menajer-panel/" class="bg-indigo-900 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md flex items-center gap-2">💼 Panel</a>
+                    {% elif user.sporcu %}
+                        <a href="/profil-duzenle/" class="bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md flex items-center gap-2">✏️ Profil</a>
+                    {% endif %}
+                    
+                    <a href="/cikis/" class="text-red-500 font-bold text-sm hover:bg-red-50 px-3 py-1 rounded-full transition">Çıkış</a>
+                {% else %}
+                    <a href="/giris/" class="text-indigo-900 font-bold hover:text-orange-500 transition">Giriş</a>
+                    <a href="/kayit/" class="bg-indigo-900 text-white px-5 py-2 rounded-full font-bold text-sm shadow hover:bg-indigo-800 transition">Kayıt Ol</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+"""
+
+FOOTER_HTML = """
+<footer class="bg-gradient-to-b from-gray-900 to-indigo-950 text-gray-300 mt-24 border-t-4 border-orange-500">
+    <div class="container mx-auto px-4 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="col-span-1 md:col-span-2">
+                <h2 class="text-3xl font-extrabold text-white mb-4">Volley<span class="text-orange-500">Markt</span></h2>
+                <p class="text-sm leading-relaxed mb-6 opacity-80">Türkiye'nin en gelişmiş voleybol veri platformu.</p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-orange-500 hover:text-white transition">𝕏</a>
+                    <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-orange-500 hover:text-white transition">📷</a>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-white font-bold text-lg mb-4 border-b-2 border-orange-500 pb-2 inline-block">Hızlı Linkler</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/" class="hover:text-orange-400 transition">→ Anasayfa</a></li>
+                    <li><a href="/haberler/" class="hover:text-orange-400 transition">→ Haber Merkezi</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-white font-bold text-lg mb-4 border-b-2 border-orange-500 pb-2 inline-block">İletişim</h3>
+                <p class="text-sm">İstanbul, Türkiye</p>
+                <p class="text-sm mt-2">info@volleymarkt.com</p>
+            </div>
+        </div>
+        <div class="border-t border-white/10 mt-12 pt-8 text-center text-xs opacity-50">&copy; 2025 VolleyMarkt. Tüm hakları saklıdır.</div>
+    </div>
+</footer>
+"""
+
+# ==========================================
+# 2. HTML ŞABLONLARI (Normal String)
+# ==========================================
+
+MAC_DETAY = """<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maç Detayı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Outfit', sans-serif; }</style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    __NAVBAR__
+
+    <main class="flex-grow container mx-auto px-4 py-12">
+        {% if messages %}<div class="mb-6">{% for m in messages %}<div class="p-4 rounded-lg bg-green-100 text-green-800 shadow-sm">✅ {{ m }}</div>{% endfor %}</div>{% endif %}
+
+        <div class="bg-gradient-to-r from-indigo-900 to-blue-900 rounded-[2rem] shadow-2xl p-8 md:p-12 text-white relative overflow-hidden mb-8">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-orange-500 opacity-10 rounded-full -ml-24 -mt-24 blur-3xl"></div>
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-8">
+                <div class="flex-1 flex flex-col items-center">
+                    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center p-2 shadow-lg">{% if mac.ev_sahibi.logo %}<img src="{{ mac.ev_sahibi.logo.url }}" class="w-full h-full object-contain">{% else %}<span class="text-gray-400 font-bold text-2xl">E</span>{% endif %}</div>
+                    <h2 class="text-2xl font-bold mt-4">{{ mac.ev_sahibi.isim }}</h2>
+                </div>
+                <div class="flex-1 flex flex-col items-center">
+                    <div class="bg-white/20 backdrop-blur px-4 py-1 rounded-full text-sm font-bold mb-4 border border-white/30">{{ mac.tarih|date:"d F Y • H:i" }}</div>
+                    <div class="text-6xl md:text-8xl font-black tracking-tighter leading-none flex items-center gap-4"><span>{{ mac.skor|default:"v" }}</span></div>
+                    {% if mac.tamamlandi %}<span class="text-green-400 font-bold mt-2 tracking-widest uppercase text-sm">MAÇ SONUCU</span>{% else %}<span class="text-orange-400 font-bold mt-2 tracking-widest uppercase text-sm animate-pulse">CANLI / OYNANMADI</span>{% endif %}
+                </div>
+                <div class="flex-1 flex flex-col items-center">
+                    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center p-2 shadow-lg">{% if mac.deplasman.logo %}<img src="{{ mac.deplasman.logo.url }}" class="w-full h-full object-contain">{% else %}<span class="text-gray-400 font-bold text-2xl">D</span>{% endif %}</div>
+                    <h2 class="text-2xl font-bold mt-4">{{ mac.deplasman.isim }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-1 bg-white rounded-[2rem] shadow-lg p-8 border border-orange-100 relative overflow-hidden">
+                <h3 class="text-xl font-bold text-indigo-900 mb-6 flex items-center gap-2">🔮 Skor Tahmini</h3>
+                {% if user.is_authenticated %}
+                    {% if mac.tamamlandi %}
+                        <div class="bg-gray-100 p-4 rounded-xl text-center text-gray-500">Maç tamamlandı.</div>
+                        {% if kullanici_tahmini %}<div class="mt-4 text-center"><p class="text-sm text-gray-500">Senin Tahminin:</p><p class="text-2xl font-bold text-indigo-900">{{ kullanici_tahmini.skor }}</p></div>{% endif %}
+                    {% else %}
+                        <form action="{% url 'tahmin_yap' mac.id %}" method="POST" class="space-y-4">
+                            {% csrf_token %}
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Skor Seçin:</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="submit" name="skor" value="3-0" class="border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 py-2 rounded-lg font-bold text-indigo-900">3-0</button>
+                                    <button type="submit" name="skor" value="3-1" class="border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 py-2 rounded-lg font-bold text-indigo-900">3-1</button>
+                                    <button type="submit" name="skor" value="3-2" class="border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 py-2 rounded-lg font-bold text-indigo-900">3-2</button>
+                                    <button type="submit" name="skor" value="0-3" class="border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 py-2 rounded-lg font-bold text-indigo-900">0-3</button>
+                                    <button type="submit" name="skor" value="1-3" class="border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 py-2 rounded-lg font-bold text-indigo-900">1-3</button>
+                                    <button type="submit" name="skor" value="2-3" class="border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 py-2 rounded-lg font-bold text-indigo-900">2-3</button>
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <div class="bg-orange-50 p-6 rounded-xl text-center border border-orange-100"><a href="/giris/" class="bg-orange-500 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-orange-600 block">Giriş Yap</a></div>
+                {% endif %}
+                <div class="mt-6 pt-6 border-t border-gray-100 text-center"><a href="/liderlik/" class="text-indigo-600 font-bold text-sm hover:underline">🏆 Liderlik Tablosu</a></div>
+            </div>
+
+            <div class="md:col-span-2 bg-white rounded-[2rem] shadow-lg p-8 border border-gray-100">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">📊 Set Sonuçları</h3>
+                {% if mac.set1 %}
+                <div class="grid grid-cols-5 gap-2 text-center mb-8">
+                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-400 font-bold uppercase">1. Set</div><div class="text-lg font-black text-indigo-900">{{ mac.set1 }}</div></div>
+                    {% if mac.set2 %}<div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-400 font-bold uppercase">2. Set</div><div class="text-lg font-black text-indigo-900">{{ mac.set2 }}</div></div>{% endif %}
+                    {% if mac.set3 %}<div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-400 font-bold uppercase">3. Set</div><div class="text-lg font-black text-indigo-900">{{ mac.set3 }}</div></div>{% endif %}
+                    {% if mac.set4 %}<div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-400 font-bold uppercase">4. Set</div><div class="text-lg font-black text-indigo-900">{{ mac.set4 }}</div></div>{% endif %}
+                    {% if mac.set5 %}<div class="bg-orange-50 p-3 rounded-xl border border-orange-100"><div class="text-xs text-orange-400 font-bold uppercase">TB</div><div class="text-lg font-black text-orange-600">{{ mac.set5 }}</div></div>{% endif %}
+                </div>
+                {% else %}<p class="text-gray-400 italic text-center py-4 mb-8">Set detayları henüz girilmemiş.</p>{% endif %}
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3"><span class="text-xl">📍</span><div><div class="text-xs text-gray-400 font-bold uppercase">Salon</div><div class="font-medium text-gray-800">{{ mac.salon|default:"Belirtilmemiş" }}</div></div></li>
+                    <li class="flex items-start gap-3"><span class="text-xl">🚩</span><div><div class="text-xs text-gray-400 font-bold uppercase">Hakemler</div><div class="font-medium text-gray-800">{{ mac.hakemler|default:"Belirtilmemiş" }}</div></div></li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    __FOOTER__
+</body>
+</html>
+"""
+
+LIDERLIK = """<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liderlik Tablosu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Outfit', sans-serif; }</style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    __NAVBAR__
+
+    <main class="flex-grow container mx-auto px-4 py-12 max-w-3xl">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-extrabold text-indigo-900 mb-4">🏆 Tahmin Ligi Liderleri</h1>
+            <p class="text-gray-600">Doğru skor tahminleriyle zirveye oynayan en iyi voleybol gurmeleri.</p>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-indigo-100">
+            <table class="w-full text-left">
+                <thead class="bg-indigo-900 text-white uppercase text-sm tracking-wider">
+                    <tr><th class="p-5 text-center w-16">#</th><th class="p-5">Kullanıcı</th><th class="p-5 text-center">Puan</th></tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for user in liderler %}
+                    <tr class="hover:bg-indigo-50 transition group">
+                        <td class="p-5 text-center font-bold text-gray-400 group-hover:text-indigo-600">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}</td>
+                        <td class="p-5 font-bold text-gray-800 text-lg flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 text-white flex items-center justify-center text-sm shadow">{{ user.username.0|upper }}</div>{{ user.username }}</td>
+                        <td class="p-5 text-center font-black text-2xl text-indigo-900 group-hover:text-orange-500 transition">{{ user.toplam_puan|default:"0" }}</td>
+                    </tr>
+                    {% empty %}<tr><td colspan="3" class="p-8 text-center text-gray-400">Henüz puan durumu oluşmadı.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+    __FOOTER__
+</body>
+</html>
+"""
+
+def write_file(path, content):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    print(f"✅ Düzeltildi: {path}")
+
+def main():
+    print("🚑 HATASIZ HTML ONARIMI BAŞLIYOR...\n")
+    
+    # Metinleri Birleştir
+    mac_full = MAC_DETAY.replace('__NAVBAR__', NAVBAR_HTML).replace('__FOOTER__', FOOTER_HTML)
+    lider_full = LIDERLIK.replace('__NAVBAR__', NAVBAR_HTML).replace('__FOOTER__', FOOTER_HTML)
+    
+    # Dosyaları Yaz
+    write_file('core/templates/mac_detay.html', mac_full)
+    write_file('core/templates/liderlik.html', lider_full)
+    
+    print("\n🎉 İŞLEM TAMAM! Siteyi yenile. Bu sefer hatasız.")
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Giriş Yap - VolleyMarkt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-indigo-900 mb-6">Giriş Yap</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Kullanıcı Adı</label>
+                <input type="text" name="username" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Şifre</label>
+                <input type="password" name="password" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+            </div>
+            <button type="submit" class="w-full bg-indigo-900 text-white font-bold py-2 px-4 rounded hover:bg-indigo-800 transition">Giriş Yap</button>
+        </form>
+        <p class="text-center mt-4 text-sm text-gray-600">Hesabın yok mu? <a href="/kayit" class="text-orange-500 font-bold">Kayıt Ol</a></p>
+        <p class="text-center mt-4 text-sm text-gray-400"><a href="/">← Ana Sayfaya Dön</a></p>
+    </div>
+</body>
+</html>

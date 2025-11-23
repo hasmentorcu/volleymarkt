@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Bildirimler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Outfit', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    
+<nav class="bg-white/95 backdrop-blur-md shadow-md sticky top-0 z-50 font-sans border-t-4 border-orange-500">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="w-11 h-11 bg-gradient-to-br from-orange-500 via-red-500 to-purple-600 rounded-2xl rotate-3 flex items-center justify-center text-white font-extrabold text-2xl shadow-lg group-hover:rotate-12 transition">V</div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-900 to-orange-600 leading-none">Volley<span class="text-orange-500">Markt</span></span>
+                    <span class="text-[10px] text-gray-400 tracking-[0.2em] uppercase font-bold">Türkiye</span>
+                </div>
+            </a>
+            <div class="hidden md:flex space-x-1 items-center bg-gray-100/50 p-1 rounded-full">
+                <a href="/" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Anasayfa</a>
+                <a href="/haberler/" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Haberler</a>
+                <a href="/#oyuncular" class="px-4 py-2 rounded-full text-gray-700 font-bold hover:bg-white hover:text-orange-600 hover:shadow-sm transition">Oyuncular</a>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                {% if user.is_authenticated %}
+                    <a href="/bildirimler/" class="relative bg-gray-100 p-2 rounded-full hover:bg-orange-100 transition group">
+                        <span class="text-xl group-hover:scale-110 block transition">🔔</span>
+                        {% if bildirim_sayisi > 0 %}
+                        <span class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm animate-bounce">{{ bildirim_sayisi }}</span>
+                        {% endif %}
+                    </a>
+
+                    {% if user.menajer %}<a href="/menajer-panel/" class="bg-indigo-900 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md">💼 Panel</a>
+                    {% elif user.sporcu %}<a href="/profil-duzenle/" class="bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md">✏️ Profil</a>{% endif %}
+                    <a href="/cikis/" class="text-red-500 font-bold text-sm">Çıkış</a>
+                {% else %}
+                    <a href="/giris/" class="text-indigo-900 font-bold">Giriş</a>
+                    <a href="/kayit/" class="bg-indigo-900 text-white px-5 py-2 rounded-full font-bold text-sm">Kayıt Ol</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+    <main class="flex-grow container mx-auto px-4 py-12 max-w-3xl">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-extrabold text-indigo-900">🔔 Bildirimler</h1>
+            <a href="/bildirim-temizle/" class="text-sm text-gray-500 hover:text-red-500 underline">Tümünü Okundu İşaretle</a>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-gray-100">
+            <ul class="divide-y divide-gray-100">
+                {% for b in bildirimler %}
+                <li class="p-6 flex gap-4 hover:bg-gray-50 transition {% if not b.okundu %}bg-orange-50/50{% endif %}">
+                    <div class="w-12 h-12 rounded-full {% if b.okundu %}bg-gray-200 text-gray-500{% else %}bg-orange-100 text-orange-600{% endif %} flex items-center justify-center text-2xl shrink-0">
+                        {% if 'Tebrikler' in b.mesaj %}🏆{% elif 'Dikkat' in b.mesaj %}⚠️{% else %}📢{% endif %}
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-gray-800 font-medium leading-snug">{{ b.mesaj }}</p>
+                        <span class="text-xs text-gray-400 mt-1 block">{{ b.tarih|timesince }} önce</span>
+                    </div>
+                    {% if not b.okundu %}<div class="w-3 h-3 bg-orange-500 rounded-full mt-2"></div>{% endif %}
+                </li>
+                {% empty %}
+                <li class="p-12 text-center text-gray-400 flex flex-col items-center">
+                    <span class="text-4xl mb-2">🔕</span>
+                    Henüz yeni bildirim yok.
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
+    
+<footer class="bg-gradient-to-b from-gray-900 to-indigo-950 text-gray-300 mt-24 border-t-4 border-orange-500">
+    <div class="container mx-auto px-4 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="col-span-1 md:col-span-2">
+                <h2 class="text-3xl font-extrabold text-white mb-4">Volley<span class="text-orange-500">Markt</span></h2>
+                <p class="text-sm leading-relaxed mb-6 opacity-80">Türkiye'nin en gelişmiş voleybol veri platformu.</p>
+            </div>
+            <div>
+                <h3 class="text-white font-bold text-lg mb-4 border-b-2 border-orange-500 pb-2 inline-block">Hızlı Linkler</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/" class="hover:text-orange-400 transition">→ Anasayfa</a></li>
+                    <li><a href="/haberler/" class="hover:text-orange-400 transition">→ Haber Merkezi</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-white font-bold text-lg mb-4 border-b-2 border-orange-500 pb-2 inline-block">İletişim</h3>
+                <p class="text-sm">İstanbul, Türkiye</p>
+                <p class="text-sm mt-2">info@volleymarkt.com</p>
+            </div>
+        </div>
+        <div class="border-t border-white/10 mt-12 pt-8 text-center text-xs opacity-50">&copy; 2025 VolleyMarkt. Tüm hakları saklıdır.</div>
+    </div>
+</footer>
+
+</body>
+</html>
