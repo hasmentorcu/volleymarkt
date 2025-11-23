@@ -5,21 +5,13 @@ from django.conf.urls.static import static
 from core.views import *
 
 urlpatterns = [
-    # --- YÖNETİM VE GÜNCELLEME ---
     path('admin/', admin.site.urls),
-    path('gizli-guncelle/', manuel_guncelleme, name='manuel_guncelleme'),
-    # path('admin-kurtar/', admin_kurtar, name='admin_kurtar'), # Eğer view'da duruyorsa açılabilir
-
-    # --- ANA SAYFALAR ---
     path('', anasayfa, name='anasayfa'),
     path('haberler/', tum_haberler, name='tum_haberler'),
-    
-    # --- DETAY SAYFALARI ---
     path('haber/<int:pk>/', haber_detay, name='haber_detay'),
     path('sporcu/<int:pk>/', sporcu_detay, name='sporcu_detay'),
     path('mac/<int:pk>/', mac_detay, name='mac_detay'),
     
-    # --- ETKİLEŞİM ---
     path('bildirimler/', bildirimler_sayfasi, name='bildirimler_sayfasi'),
     path('bildirim-temizle/', bildirim_temizle, name='bildirim_temizle'),
     path('tahmin-yap/<int:mac_id>/', tahmin_yap, name='tahmin_yap'),
@@ -27,17 +19,13 @@ urlpatterns = [
     path('karsilastir/', karsilastir, name='karsilastir'),
     path('oy-ver/<int:anket_id>/', oy_ver, name='oy_ver'),
 
-    # --- KULLANICI İŞLEMLERİ ---
     path('giris/', giris_yap, name='giris'),
     path('kayit/', kayit_ol, name='kayit'),
     path('cikis/', cikis_yap, name='cikis'),
     
-    # --- PANELLER ---
     path('profil-duzenle/', profil_duzenle, name='profil_duzenle'),
     path('menajer-panel/', menajer_panel, name='menajer_panel'),
     path('menajer/ekle/', menajer_oyuncu_ekle, name='menajer_oyuncu_ekle'),
     path('menajer/duzenle/<int:pk>/', menajer_oyuncu_duzenle, name='menajer_oyuncu_duzenle'),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG: urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

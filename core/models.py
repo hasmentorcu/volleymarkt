@@ -2,27 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 
 MEVKILER = (('PASOR', 'Pasör'), ('PASOR_CAPRAZI', 'Pasör Çaprazı'), ('SMACOR', 'Smaçör'), ('ORTA_OYUNCU', 'Orta Oyuncu'), ('LIBERO', 'Libero'))
-
-# YENİ: LİG SEÇENEKLERİ
-LIGLER = (
-    ('SULTANLAR', 'Vodafone Sultanlar Ligi'),
-    ('EFELER', 'AXA Sigorta Efeler Ligi'),
-    ('KADIN_1', 'Kadınlar 1. Ligi'),
-    ('ERKEK_1', 'Erkekler 1. Ligi'),
-)
+LIGLER = (('SULTANLAR', 'Vodafone Sultanlar Ligi'), ('EFELER', 'AXA Sigorta Efeler Ligi'), ('KADIN_1', 'Kadınlar 1. Ligi'), ('ERKEK_1', 'Erkekler 1. Ligi'))
 
 class Kulup(models.Model):
-    isim = models.CharField(max_length=100)
-    sehir = models.CharField(max_length=50)
-    # YENİ ALAN: LİG
-    lig = models.CharField(max_length=20, choices=LIGLER, default='SULTANLAR', verbose_name="Bulunduğu Lig")
-    kurulus_yili = models.PositiveIntegerField(null=True, blank=True)
-    logo = models.ImageField(upload_to='kulupler/', null=True, blank=True)
-    
+    isim = models.CharField(max_length=100); sehir = models.CharField(max_length=50); 
+    lig = models.CharField(max_length=20, choices=LIGLER, default='SULTANLAR'); 
+    kurulus_yili = models.PositiveIntegerField(null=True, blank=True); logo = models.ImageField(upload_to='kulupler/', null=True, blank=True)
     def __str__(self): return f"{self.isim} ({self.get_lig_display()})"
     class Meta: verbose_name_plural = "Kulüpler"
 
-# (Diğer modeller aynı kalıyor, kısalttım)
 class Menajer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True); isim = models.CharField(max_length=100); sirket_adi = models.CharField(max_length=100, blank=True); telefon = models.CharField(max_length=20, blank=True)
     def __str__(self): return self.isim
@@ -44,6 +32,7 @@ class PuanDurumu(models.Model):
 class Mac(models.Model):
     ev_sahibi = models.ForeignKey(Kulup, related_name='ev_maclari', on_delete=models.CASCADE); deplasman = models.ForeignKey(Kulup, related_name='dep_maclari', on_delete=models.CASCADE); tarih = models.DateTimeField(); skor = models.CharField(max_length=10, blank=True, default="-"); salon = models.CharField(max_length=100, blank=True); hakemler = models.CharField(max_length=200, blank=True); set1 = models.CharField(max_length=10, blank=True); set2 = models.CharField(max_length=10, blank=True); set3 = models.CharField(max_length=10, blank=True); set4 = models.CharField(max_length=10, blank=True); set5 = models.CharField(max_length=10, blank=True); tamamlandi = models.BooleanField(default=False)
     class Meta: ordering = ['tarih']
+    def __str__(self): return f"{self.ev_sahibi} vs {self.deplasman}"
 
 class Haber(models.Model):
     baslik = models.CharField(max_length=200); ozet = models.TextField(max_length=500); icerik = models.TextField(); resim = models.ImageField(upload_to='haberler/'); tarih = models.DateTimeField(auto_now_add=True); kategori = models.CharField(max_length=20, choices=[('Transfer', 'Transfer'), ('Mac', 'Maç Sonucu'), ('Ozel', 'Özel Haber')], default='Ozel'); manset_mi = models.BooleanField(default=False)

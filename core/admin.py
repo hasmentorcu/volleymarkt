@@ -6,25 +6,25 @@ class TransferInline(admin.TabularInline): model = Transfer; extra = 1; fk_name 
 
 @admin.register(Kulup)
 class KulupAdmin(admin.ModelAdmin):
-    list_display = ('isim', 'lig', 'sehir') # Lig eklendi
-    list_filter = ('lig', 'sehir')          # Lig filtresi eklendi
+    list_display = ('isim', 'lig', 'sehir')
+    list_filter = ('lig', 'sehir')
 
 @admin.register(PuanDurumu)
 class PuanDurumuAdmin(admin.ModelAdmin):
-    list_display = ('kulup', 'kulup_lig', 'puan')
-    list_filter = ('kulup__lig',) # Lige göre puan durumu süzme
-    def kulup_lig(self, obj): return obj.kulup.get_lig_display()
+    list_display = ('kulup', 'get_lig', 'puan')
+    list_filter = ('kulup__lig',)
+    def get_lig(self, obj): return obj.kulup.get_lig_display()
 
 @admin.register(Sporcu)
 class SporcuAdmin(admin.ModelAdmin):
     list_display = ('isim', 'mevki', 'kulup', 'piyasa_degeri')
-    list_filter = ('mevki', 'kulup__lig') # Lige göre sporcu süzme
+    list_filter = ('mevki', 'kulup__lig')
     inlines = [TransferInline]
 
-# Diğerleri
 admin.site.register(Menajer)
 admin.site.register(Mac)
 admin.site.register(Haber)
 admin.site.register(Yorum)
 admin.site.register(Bildirim)
-admin.site.register(Anket, list_display=('soru', 'aktif_mi'), inlines=[SecenekInline])
+admin.site.register(Anket, inlines=[SecenekInline])
+admin.site.register(Tahmin)

@@ -15,49 +15,50 @@ def get_context(request):
     return ctx
 
 def anasayfa(request):
-    # 1. FİLTRELEME
     sporcular = Sporcu.objects.all()
-    # Yeni: Lig filtresi eklendi
+    # Lig Filtresi
     secili_lig = request.GET.get('lig')
     if secili_lig: sporcular = sporcular.filter(kulup__lig=secili_lig)
     
-    isim = request.GET.get('isim'); kulup_id = request.GET.get('kulup'); mevki = request.GET.get('mevki'); min_boy = request.GET.get('min_boy'); max_boy = request.GET.get('max_boy')
+    # Diğer Filtreler
+    isim = request.GET.get('isim'); kulup_id = request.GET.get('kulup'); mevki = request.GET.get('mevki')
     if isim: sporcular = sporcular.filter(isim__icontains=isim)
     if kulup_id: sporcular = sporcular.filter(kulup_id=kulup_id)
     if mevki: sporcular = sporcular.filter(mevki=mevki)
-    if min_boy: sporcular = sporcular.filter(boy__gte=min_boy)
-    if max_boy: sporcular = sporcular.filter(boy__lte=max_boy)
 
-    # 2. PUAN DURUMLARI (AYRI AYRI)
+    # Puan Durumları
     puan_sultanlar = PuanDurumu.objects.filter(kulup__lig='SULTANLAR').order_by('-puan')
     puan_efeler = PuanDurumu.objects.filter(kulup__lig='EFELER').order_by('-puan')
 
-    # 3. HABER VE REKLAM
-    mansetler = Haber.objects.filter(manset_mi=True)[:10]
-    # Haber ve Reklam Objelerini View'da değil Template'de dizeceğiz bu sefer
-    
-    # 4. GRAFİKLER (Sadece Sultanlar için örnek, genellenebilir)
+    # Haberler ve Reklamlar
+    mansetler_raw = list(Haber.objects.filter(manset_mi=True)[:10])
+    reklam_1 = {'is_ad': True, 'image': 'https://via.placeholder.com/800x400/FF5733/FFFFFF?text=REKLAM+1', 'link': '#'}
+    reklam_2 = {'is_ad': True, 'image': 'https://via.placeholder.com/800x400/33FF57/FFFFFF?text=REKLAM+2', 'link': '#'}
+    mansetler = []
+    sayac = 0
+    for h in mansetler_raw:
+        mansetler.append(h); sayac += 1
+        if sayac == 2: mansetler.append(reklam_1)
+        if sayac == 5: mansetler.append(reklam_2)
+
+    # Grafikler
     mevki_data = sporcular.values('mevki').annotate(total=Count('id'))
     mevki_labels = [m['mevki'] for m in mevki_data]; mevki_counts = [m['total'] for m in mevki_data]
+    en_uzunlar = sporcular.filter(boy__isnull=False).order_by('-boy')[:5]
+    uzun_labels = [s.isim for s in en_uzunlar]; uzun_values = [s.boy for s in en_uzunlar]
     
     context = {
-        'sporcular': sporcular, 
-        'puan_sultanlar': puan_sultanlar, 'puan_efeler': puan_efeler, # Ayrı gönderdik
-        'maclar': Mac.objects.all().order_by('tarih')[:5],
-        'kulupler': Kulup.objects.all(), 'mevkiler': MEVKILER, 
+        'sporcular': sporcular, 'puan_sultanlar': puan_sultanlar, 'puan_efeler': puan_efeler,
+        'maclar': Mac.objects.all().order_by('tarih')[:5], 'kulupler': Kulup.objects.all(), 'mevkiler': MEVKILER,
         'mansetler': mansetler, 'son_haberler': Haber.objects.all().order_by('-tarih')[:6],
-        'aktif_anket': Anket.objects.filter(aktif_mi=True).last(),
-        'mevki_labels': mevki_labels, 'mevki_counts': mevki_counts,
-        'tum_sporcular': Sporcu.objects.all().order_by('isim'),
-        
-        # Filtre değerlerini geri gönder
-        'secili_lig': secili_lig, 'secili_isim': isim, 'secili_kulup': int(kulup_id) if kulup_id else None,
-        'secili_mevki': mevki, 'secili_min_boy': min_boy, 'secili_max_boy': max_boy,
+        'aktif_anket': Anket.objects.filter(aktif_mi=True).last(), 'tum_sporcular': Sporcu.objects.all().order_by('isim'),
+        'mevki_labels': mevki_labels, 'mevki_counts': mevki_counts, 'uzun_labels': uzun_labels, 'uzun_values': uzun_values,
+        'secili_lig': secili_lig, 'secili_isim': isim, 'secili_kulup': int(kulup_id) if kulup_id else None, 'secili_mevki': mevki
     }
     context.update(get_context(request))
     return render(request, 'index.html', context)
 
-# --- Diğer Viewlar (Kısaltıldı, aynı) ---
+# (Diğer standart fonksiyonlar korundu)
 def mac_detay(request, pk):
     mac = get_object_or_404(Mac, pk=pk); t=None
     if request.user.is_authenticated: t=Tahmin.objects.filter(user=request.user, mac=mac).first()
