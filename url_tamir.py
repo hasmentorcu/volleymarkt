@@ -1,4 +1,7 @@
-from django.contrib import admin
+import os
+
+# TÜM LİNKLERİ İÇEREN EKSİKSİZ DOSYA
+FULL_URLS_CONTENT = """from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
@@ -41,3 +44,23 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+"""
+
+def repair_urls():
+    # Doğru dosya yolunu bul
+    target_path = 'volleymarkt/urls.py'
+    if not os.path.exists(target_path):
+        # Belki ana dizindedir
+        if os.path.exists('urls.py'):
+            target_path = 'urls.py'
+        else:
+            print("❌ Hata: urls.py bulunamadı! Lütfen 'volleymarkt' klasörünün içinde olduğundan emin ol.")
+            return
+
+    with open(target_path, 'w', encoding='utf-8') as f:
+        f.write(FULL_URLS_CONTENT)
+    
+    print(f"✅ {target_path} başarıyla onarıldı! Tüm linkler geri geldi.")
+
+if __name__ == '__main__':
+    repair_urls()
