@@ -4,26 +4,27 @@ from .models import *
 class SecenekInline(admin.TabularInline): model = Secenek; extra = 3
 class TransferInline(admin.TabularInline): model = Transfer; extra = 1; fk_name = "sporcu"
 
-@admin.register(Mac)
-class MacAdmin(admin.ModelAdmin):
-    list_display = ('tarih', 'ev_sahibi', 'skor', 'deplasman', 'salon', 'tamamlandi')
-    list_filter = ('tamamlandi', 'tarih')
-    fieldsets = (
-        ('Temel Bilgiler', {'fields': ('ev_sahibi', 'deplasman', 'tarih', 'salon', 'hakemler')}),
-        ('Sonuç', {'fields': ('tamamlandi', 'skor')}),
-        ('Set Detayları', {'fields': ('set1', 'set2', 'set3', 'set4', 'set5')}),
-    )
+@admin.register(Kulup)
+class KulupAdmin(admin.ModelAdmin):
+    list_display = ('isim', 'lig', 'sehir') # Lig eklendi
+    list_filter = ('lig', 'sehir')          # Lig filtresi eklendi
+
+@admin.register(PuanDurumu)
+class PuanDurumuAdmin(admin.ModelAdmin):
+    list_display = ('kulup', 'kulup_lig', 'puan')
+    list_filter = ('kulup__lig',) # Lige göre puan durumu süzme
+    def kulup_lig(self, obj): return obj.kulup.get_lig_display()
 
 @admin.register(Sporcu)
 class SporcuAdmin(admin.ModelAdmin):
     list_display = ('isim', 'mevki', 'kulup', 'piyasa_degeri')
-    list_filter = ('mevki', 'kulup')
+    list_filter = ('mevki', 'kulup__lig') # Lige göre sporcu süzme
     inlines = [TransferInline]
 
-# Diğerleri standart
-admin.site.register(Kulup)
+# Diğerleri
 admin.site.register(Menajer)
-admin.site.register(PuanDurumu)
+admin.site.register(Mac)
 admin.site.register(Haber)
-admin.site.register(Anket, list_display=('soru', 'aktif_mi'), inlines=[SecenekInline])
 admin.site.register(Yorum)
+admin.site.register(Bildirim)
+admin.site.register(Anket, list_display=('soru', 'aktif_mi'), inlines=[SecenekInline])
