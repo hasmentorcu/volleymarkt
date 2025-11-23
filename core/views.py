@@ -162,3 +162,16 @@ def menajer_oyuncu_duzenle(request, pk):
     s=get_object_or_404(Sporcu, pk=pk, menajer=request.user.menajer)
     if request.method=='POST': f=SporcuForm(request.POST, request.FILES, instance=s); f.save(); return redirect('menajer_panel')
     return render(request, 'menajer_form.html', {'form': SporcuForm(instance=s), 'baslik': 'Düzenle'})
+# ... (Mevcut importların altına ekle)
+from django.core.management import call_command
+from django.http import HttpResponse
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required # Sadece adminler çalıştırabilsin
+def manuel_guncelleme(request):
+    # Bu fonksiyon 'tam_guncelleme' komutunu çalıştırır
+    try:
+        call_command('tam_guncelleme')
+        return HttpResponse("✅ GÜNCELLEME BAŞARIYLA TAMAMLANDI! Siteyi kontrol edebilirsin.")
+    except Exception as e:
+        return HttpResponse(f"❌ HATA OLUŞTU: {str(e)}")

@@ -29,3 +29,10 @@ urlpatterns = [
     path('menajer/duzenle/<int:pk>/', menajer_oyuncu_duzenle, name='menajer_oyuncu_duzenle'),
 ]
 if settings.DEBUG: urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# ... (Mevcut importlar)
+from core.views import manuel_guncelleme # <-- Bunu import etmeyi unutma
+
+urlpatterns = [
+    # ... (Eski linkler burada) ...
+    path('gizli-guncelle/', manuel_guncelleme, name='manuel_guncelleme'), # <-- BU SATIRI EKLE
+]
